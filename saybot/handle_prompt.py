@@ -1,5 +1,5 @@
 
-from saybot import Update,ContextTypes,logging,generate_response,emoji,datetime,timedelta
+from saybot import Update,ContextTypes,logging,generate_response,emoji,datetime,timedelta,generate_chat
 
 
 promt_time_stamp = {} # dictionary for storing each users' last used time and count
@@ -36,7 +36,9 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                 list_of_emojis = emoji.emoji_list(message_text) # listing emojis in user input to avoid processing
                 if isinstance(message_text,str) and len(list_of_emojis) == 0:
                     logging.info(f"User - \n {message_text}")
-                    ai_response = generate_response(message_text) # return is  never None
+                    # ai_response = generate_response(message_text) # return is  never None
+                    ai_response = generate_chat(message_text) # return is  never None
+
                     logging.info(f"AI - {ai_response}")
                     await update.message.reply_text(reply_to_message_id=update.message.id,text=ai_response)
                 else:

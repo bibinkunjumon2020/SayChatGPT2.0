@@ -10,6 +10,7 @@ from telegram.ext import Updater,CommandHandler,MessageHandler,filters,Applicati
 from datetime import datetime,timedelta
 
 from saybot.generate_response import generate_response
+from saybot.generate_chat import generate_chat
 from saybot.handle_prompt import handle_message
 from saybot.handle_start import handle_start_command
 
@@ -23,4 +24,4 @@ logging.basicConfig(level=logging.INFO)
 
 
 
-__all__ = ['generate_response','handle_message','handle_start_command']
+__all__ = ['generate_response','handle_message','handle_start_command','generate_chat']
