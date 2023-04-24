@@ -35,7 +35,7 @@ Username : https://t.me/SayGPTBot
 Bot :
 
 <img width="423" alt="image" src="https://user-images.githubusercontent.com/104210649/234112509-4978f976-1ca6-4566-acfc-b1b8826795a1.png">
-![telegram-cloud-photo-size-5-6212813594488321404-y](https://user-images.githubusercontent.com/104210649/234122985-aa18c798-e40f-42b1-a60e-5b4cf3e673ae.jpg)
+<img width="423" alt="image" src="https://user-images.githubusercontent.com/104210649/234122985-aa18c798-e40f-42b1-a60e-5b4cf3e673ae.jpg">
 
 
 
