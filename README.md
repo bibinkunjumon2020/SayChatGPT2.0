@@ -18,7 +18,7 @@ OR
 Otherwise supply env variables in docer IDE
 ```
 
-env file has 3 APIs:
+env file has 2 APIs:
 ```
 API_BOT=###
 API_OPENAI=###
