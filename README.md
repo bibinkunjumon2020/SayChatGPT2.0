@@ -35,11 +35,9 @@ Username : https://t.me/SayGPTBot
 Bot :
 
 <img width="423" alt="image" src="https://user-images.githubusercontent.com/104210649/234112509-4978f976-1ca6-4566-acfc-b1b8826795a1.png">
-<img width="423" alt="image" src="https://user-images.githubusercontent.com/104210649/234122985-aa18c798-e40f-42b1-a60e-5b4cf3e673ae.jpg">
-
-
 
 <img width="440" alt="image" src="https://user-images.githubusercontent.com/104210649/234112745-a4269ed6-efdd-40b1-bf47-2de0d25613e5.png">
+![gptwelcome](https://user-images.githubusercontent.com/104210649/234123476-3670cd52-a37e-4a41-b6a7-ff6222a20820.jpg)
 
 
 ## Working Screenshots
