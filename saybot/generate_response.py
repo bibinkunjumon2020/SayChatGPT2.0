@@ -7,6 +7,7 @@ def generate_response(prompt):
     prompt += "?"
     try:
         message_response="Server Error" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
+       
         response = openai.Completion.create(
             engine="text-davinci-003",
             prompt=prompt,
