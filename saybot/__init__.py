@@ -29,7 +29,6 @@ load_dotenv(dotenv_path)
 logging.basicConfig(level=logging.INFO)
 
 
-
 __all__ = ['generate_response','handle_message','handle_start_command',\
            'generate_chat','generate_image','check_prompt_balance',\
           ]

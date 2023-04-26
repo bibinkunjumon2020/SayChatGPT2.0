@@ -1,11 +1,12 @@
-from saybot import Update,timedelta,datetime,sqlite3,logging,store_prompt_quota
+from saybot import Update,timedelta,datetime,sqlite3,logging,store_prompt_quota,os
 
+db_path = os.path.join(os.getcwd(),"database","user_data.db")
 
 async def check_prompt_balance(update:Update): # daily prompt limit is defined and managed
     user_id = update.message.from_user.id # individual user IDs
     prompt_quota=10 # manually fixing it
     
-    with sqlite3.connect('user_data.db') as connection:
+    with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(user_id,))  #accessing this users entry
         data = cursor.fetchone()

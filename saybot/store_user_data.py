@@ -1,8 +1,10 @@
 
-from saybot import Update, logging,datetime,sqlite3
+from saybot import Update, logging,datetime,sqlite3,os
 
 # create table if not exists
-with sqlite3.connect('user_data.db') as connection:
+db_path = os.path.join(os.getcwd(),"database","user_data.db")
+
+with sqlite3.connect(db_path) as connection:
     cursor = connection.cursor()                # This Store User Information
     cursor.execute('''CREATE TABLE IF NOT EXISTS users     
              (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +28,7 @@ async def store_user_data(update: Update):
         "location": update.message.chat.location,
     }
 
-    with sqlite3.connect('user_data.db') as connection:
+    with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         try:
             cursor.execute("SELECT id FROM users WHERE id=?", (user_data['id'],))
@@ -59,7 +61,7 @@ async def store_prompt_quota(update:Update,**args):
         'prompt_balance':args.get('prompt_balance'),
         "prompt_quota":args.get('prompt_quota')
     }
-    with sqlite3.connect('user_data.db') as connection:
+    with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         try:
             cursor.execute("SELECT id FROM usage_analysis WHERE id=?",(prompt_data.get("id"),))

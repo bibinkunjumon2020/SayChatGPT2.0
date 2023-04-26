@@ -1,7 +1,8 @@
 
 from saybot import Update,ContextTypes,logging,generate_response,emoji,\
-    generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3
+    generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os
 
+db_path = os.path.join(os.getcwd(),"database","user_data.db")
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
     logging.info("inside chat messages")
@@ -19,7 +20,7 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                     # ai_response = generate_image(message_text) # return is  never None
 
                     ## Adding Usage statistics
-                    with sqlite3.connect('user_data.db') as connection:
+                    with sqlite3.connect(db_path) as connection:
                         cursor = connection.cursor()
                         cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
                         data=cursor.fetchone()
