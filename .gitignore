@@ -7,3 +7,4 @@ env
 Dockerfile
 __pycache__
 *.db
+generate_text_eleutherai.py

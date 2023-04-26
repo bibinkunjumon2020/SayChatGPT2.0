@@ -1,4 +1,4 @@
-from saybot import Update,ContextTypes,logging,Bot,os
+from saybot import Update,ContextTypes,logging,Bot,os,store_user_data
 
 # Define function to handle the /start command
 async def handle_start_command(update:Update, context:ContextTypes.DEFAULT_TYPE):
@@ -11,4 +11,6 @@ async def handle_start_command(update:Update, context:ContextTypes.DEFAULT_TYPE)
     MAX TOKENS : 4096 \n TRAINING DATA :Sep 2021"
     logging.info(welcome_text)
     await bot.send_message(chat_id=message.chat_id, text=welcome_text)
+    await store_user_data(update=update)
+    logging.info("User Data Stored")
  

@@ -14,7 +14,8 @@ from saybot.generate_response import generate_response
 from saybot.generate_chat import generate_chat
 from saybot.generate_image import generate_image
 
-from saybot.store_user_data import store_user_data
+from saybot.store_user_data import store_user_data,store_prompt_quota
+from saybot.handler_prompt_quota import check_prompt_balance
 
 from saybot.handle_prompt import handle_message
 from saybot.handle_start import handle_start_command
@@ -30,4 +31,5 @@ logging.basicConfig(level=logging.INFO)
 
 
 __all__ = ['generate_response','handle_message','handle_start_command',\
-           'generate_chat','generate_image','store_user_data']
+           'generate_chat','generate_image','check_prompt_balance',\
+          ]

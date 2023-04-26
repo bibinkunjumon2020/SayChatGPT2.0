@@ -1,34 +1,12 @@
 
-from saybot import Update,ContextTypes,logging,generate_response,emoji,datetime,timedelta,generate_chat,generate_image,store_user_data
-
-
-promt_time_stamp = {} # dictionary for storing each users' last used time and count
-user_promt_limit =10 # prompt limit for each user with in 24 hours
-
-async def promt_limit(update:Update): # daily prompt limit is defined
-    user_id = update.message.chat_id # individual user IDs
-    now = datetime.now()   # current time
-
-    if user_id in promt_time_stamp:
-        last_sent = promt_time_stamp[user_id]['time']
-        if (now-last_sent) < timedelta(hours=24) and promt_time_stamp[user_id]['count'] >= user_promt_limit: # checking 24 hr and usage count
-            logging.info("Limit Crossed")
-            return False
-        elif(now-last_sent >= timedelta(hours=24)): # If 24 hr crossed from last usage
-            promt_time_stamp[user_id]={'time':now,'count':1}
-            return True
-        else:                                       # Increase usage count till 'user_promt_limit'
-            promt_time_stamp[user_id]['count'] += 1 
-            return True
-    else:
-        promt_time_stamp[user_id]={'time':now,'count':1}
-        return True
+from saybot import Update,ContextTypes,logging,generate_response,emoji,\
+    generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3
 
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
     logging.info("inside chat messages")
-    prompt_permission = await promt_limit(update=update) # Users daily limit checking(True or False )
-    logging.info(promt_time_stamp)
+    prompt_permission = await check_prompt_balance(update=update) # Users daily limit checking(True or False )
+    
     if prompt_permission:
         if update.message.text: #checking the input is text(emoji also a text)
             message_text = update.message.text
@@ -40,8 +18,18 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                     ai_response = generate_chat(message_text) # return is  never None
                     # ai_response = generate_image(message_text) # return is  never None
 
-                    logging.info(f"AI - {ai_response}")
-                    await update.message.reply_text(reply_to_message_id=update.message.id,text=ai_response)
+                    ## Adding Usage statistics
+                    with sqlite3.connect('user_data.db') as connection:
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
+                        data=cursor.fetchone()
+                        prompt_balance = data[2]
+                        prompt_quota = data[3]
+                        connection.commit()
+                    display_text = f"{ai_response}\n****Your Account****\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
+
+                    logging.info(f"AI - {display_text}")
+                    await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
                     await store_user_data(update=update)  # Store user data in MySQL
                     
                 else:
@@ -56,4 +44,4 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
             logging.error("Input is not a [update.message.text] or is a [update.message.media]")
             await update.message.reply_text(reply_to_message_id=update.message.id,text="Only Text Input Permitted")
     else: # Daily limit over
-        await update.message.reply_text(reply_to_message_id=update.message.id,text="Limit Crossed")
+        await update.message.reply_text(reply_to_message_id=update.message.id,text="Daily Limit Crossed \nUsed:10\nTotal:10")
