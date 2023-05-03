@@ -1,8 +1,7 @@
 from saybot import openai,os,logging
 
 def generate_chat(prompt):
-    # Set up OpenAI API key
-    logging.info("Contacting ChatGPT 3.5 Turbo")
+    logging.info("Using ChatGPT 3.5 Turbo")
     openai.api_key = os.getenv("API_OPENAI")
     try:
         message_response="Server Error or Usage Limit"# To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out

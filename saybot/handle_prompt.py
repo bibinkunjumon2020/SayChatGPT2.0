@@ -2,7 +2,19 @@
 from saybot import Update,ContextTypes,logging,generate_response,emoji,\
     generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os
 
+from saybot.config import ConfigClass
+
 db_path = os.path.join(os.getcwd(),"database","user_data.db")
+
+
+def choose_model(prompt): # method for chosing the Model as per user command
+    config = ConfigClass()
+    func = config.current_model_function()
+    if func is not None:
+        response = func(prompt=prompt)
+        return response
+    else:
+        logging.error("Model does not exist")
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
     prompt_permission = await check_prompt_balance(update=update) # Users daily limit checking(True or False )
@@ -15,9 +27,10 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                 if isinstance(message_text,str) and len(list_of_emojis) == 0:
                     logging.info(f"User - \n {message_text}")
                     # ai_response = generate_response(message_text) # return is  never None
-                    ai_response = generate_chat(message_text) # return is  never None
+                    # ai_response = generate_chat(message_text) # return is  never None
                     # ai_response = generate_image(message_text) # return is  never None
 
+                    ai_response = choose_model(message_text)
                     ## Adding Usage statistics
                     with sqlite3.connect(db_path) as connection:
                         cursor = connection.cursor()

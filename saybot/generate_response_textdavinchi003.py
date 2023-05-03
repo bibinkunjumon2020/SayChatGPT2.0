@@ -2,7 +2,7 @@ from saybot import openai,os,logging
 
 def generate_response(prompt):
     # Set up OpenAI API key
-    logging.info("Contacting OpenAI")
+    logging.info("Using text-davinci-003")
     openai.api_key = os.getenv("API_OPENAI")
     prompt += "?"
     try:
@@ -17,7 +17,7 @@ def generate_response(prompt):
             temperature=0.2,
         )
         if response is not None and len(response.choices[0].text) > 0:
-            message_response = response.choices[0].text + "."
+            message_response = response.choices[0].text
         else:
             message_response = "Sorry, no response could be generated."
     except Exception as e:
