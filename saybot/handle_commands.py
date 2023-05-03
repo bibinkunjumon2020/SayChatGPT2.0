@@ -24,9 +24,14 @@ async def handle_start_command(update: Update, context: Context) -> None:
 async def handle_model_selection_command(update: Update, context:Context, model_command: Any) -> None:
     bot, message, _ = get_message_data(update)
     ConfigClass.set_model_selection_command(model_command)  # set the new model selection command in the instance
-    model_selection_command = ConfigClass.get_model_selection_command()  
-    await bot.send_message(chat_id=message.chat_id, text=f"Model {model_command} selected for Conversation!!!")
-    logging.info(f"***Inside handle_command_{model_command} ***" + str(model_selection_command))
+    model_selection_command = ConfigClass.get_model_selection_command()
+    if model_command == "dall.e2":
+        display_text = f"Model \"{model_command}\" of OpenAI used for IMAGE generation.\nInput your 'prompt' for image generation."
+    else:
+        display_text = f"Model \"{model_command}\" selected for further TEXT generation!"
+
+    await bot.send_message(chat_id=message.chat_id, text=display_text)
+    logging.info(f"***Inside handle_command_{model_command} ***{model_selection_command}")
 
 
 # Define function to handle the /gpt35turbo command
@@ -37,3 +42,7 @@ async def handle_command_gpt35turbo(update: Update, context: Context) -> None:
 # Define function to handle the /textdavinci003 command
 async def handle_command_textdavinci003(update: Update, context: Context) -> None:
     await handle_model_selection_command(update, context, "text-davinci-003") 
+
+# Define function to handle the /image command
+async def handle_command_image_dalle2(update: Update, context: Context) -> None:
+    await handle_model_selection_command(update, context, "dall.e2") 

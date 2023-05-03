@@ -1,20 +1,18 @@
 from saybot import openai,os,logging
 
 def generate_image(prompt):
-    # Set up OpenAI API key
-    logging.info("Contacting GPT image")
+    logging.info("Using DALL.E 2")
     openai.api_key = os.getenv("API_OPENAI")
-    print(openai.api_key)
     try:
-        message_response="Server Error or Usage Limit" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
-        number_of_picture = 2
-        response = openai.Image.create({
-            "prompt":prompt,
-            "n":number_of_picture,
-            "size":"1024*1024"
-        }
+        message_response="Server Error or Usage Limit" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out        
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1, # number of pics
+            size="1024x1024",
+            response_format="url",
         )
         url = response['data'][0]["url"]
+        # logging.info(str(url))
         if response is not None and len(url) > 0:
             message_response = url
         else:

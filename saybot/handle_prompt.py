@@ -1,6 +1,6 @@
 
 from saybot import Update,ContextTypes,logging,generate_response,emoji,\
-    generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os
+    generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os,validators,requests
 
 from saybot.config import ConfigClass
 
@@ -15,6 +15,12 @@ def choose_model(prompt): # method for chosing the Model as per user command
         return response
     else:
         logging.error("Model does not exist")
+
+def check_response_url(response):
+    if validators.url(response):
+        return True #response is a url or image url
+    else:
+        return False # response is text
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
     prompt_permission = await check_prompt_balance(update=update) # Users daily limit checking(True or False )
@@ -31,18 +37,24 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                     # ai_response = generate_image(message_text) # return is  never None
 
                     ai_response = choose_model(message_text)
-                    ## Adding Usage statistics
-                    with sqlite3.connect(db_path) as connection:
-                        cursor = connection.cursor()
-                        cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
-                        data=cursor.fetchone()
-                        prompt_balance = data[2]
-                        prompt_quota = data[3]
-                        connection.commit()
-                    display_text = f"{ai_response}\n****Your Account****\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
+                    ai_response_image_check = check_response_url(ai_response)
+                    if ai_response_image_check:
+                        image_data = requests.get(ai_response).content
+                        await context.bot.send_photo(chat_id=update.message.chat_id,photo=image_data)
+                    else:
+                        ## Adding Usage statistics
+                        with sqlite3.connect(db_path) as connection:
+                            cursor = connection.cursor()
+                            cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
+                            data=cursor.fetchone()
+                            prompt_balance = data[2]
+                            prompt_quota = data[3]
+                            connection.commit()
+                        display_text = f"{ai_response}\n****Your Account****\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
 
-                    logging.info(f"AI - {display_text}")
-                    await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
+                        # logging.info(f"AI - {display_text}")
+                        await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
+
                     await store_user_data(update=update)  # Store user data in MySQL
                     
                 else:

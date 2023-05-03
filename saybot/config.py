@@ -1,5 +1,5 @@
 
-from saybot import generate_chat,generate_response
+from saybot import generate_chat,generate_response,generate_image
 
 
 class ConfigClass:
@@ -7,6 +7,7 @@ class ConfigClass:
     model_list_dictionary={
         'gpt-3.5-turbo':generate_chat,
         'text-davinci-003':generate_response,
+        'dall.e2':generate_image,
         }
     def __init__(self):
         pass
