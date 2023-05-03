@@ -6,7 +6,7 @@ def generate_image(prompt):
     openai.api_key = os.getenv("API_OPENAI")
     print(openai.api_key)
     try:
-        message_response="Server Error or Usage Limit" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
+        message_response="Server Error" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
         number_of_picture = 2
         response = openai.Image.create({
             "prompt":prompt,

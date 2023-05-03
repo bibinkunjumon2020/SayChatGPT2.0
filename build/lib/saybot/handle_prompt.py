@@ -5,6 +5,7 @@ from saybot import Update,ContextTypes,logging,generate_response,emoji,\
 db_path = os.path.join(os.getcwd(),"database","user_data.db")
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
+    logging.info("inside chat messages")
     prompt_permission = await check_prompt_balance(update=update) # Users daily limit checking(True or False )
     
     if prompt_permission:

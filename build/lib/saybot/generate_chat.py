@@ -5,7 +5,7 @@ def generate_chat(prompt):
     logging.info("Contacting ChatGPT 3.5 Turbo")
     openai.api_key = os.getenv("API_OPENAI")
     try:
-        message_response="Server Error or Usage Limit"# To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
+        message_response="Server Error" # To avoid HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out
        
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -16,6 +16,7 @@ def generate_chat(prompt):
             
         )
         answer = response['choices'][0]["message"]["content"]
+        logging.info(answer)
         if response is not None and len(answer) > 0:
             message_response = answer
         else:

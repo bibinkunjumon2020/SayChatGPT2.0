@@ -4,7 +4,7 @@ db_path = os.path.join(os.getcwd(),"database","user_data.db")
 
 async def check_prompt_balance(update:Update): # daily prompt limit is defined and managed
     user_id = update.message.from_user.id # individual user IDs
-    prompt_quota=100 # manually fixing it
+    prompt_quota=10 # manually fixing it
     
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()

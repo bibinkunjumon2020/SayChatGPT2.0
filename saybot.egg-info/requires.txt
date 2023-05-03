@@ -1,0 +1,6 @@
+openai
+emoji
+python-dotenv
+telegram
+datetime
+python-telegram-bot
