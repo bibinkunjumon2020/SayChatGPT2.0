@@ -1,11 +1,41 @@
-.env
+
 env
-.idea
-.vscode
+
 .DS_Store
 .dockerignore
 Dockerfile
 __pycache__
 *.db
-generate_text_eleutherai.py
 build
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django-related files
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+media/
+env_portfolio
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment-specific files
+*.env
+.env.local
+.env.*.local
+.env.*.local.*
+!.env.example
+
+# Compiled Python files
+*.pyc
+
+# Dependencies
+venv/
