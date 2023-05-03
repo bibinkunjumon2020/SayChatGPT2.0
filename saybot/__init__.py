@@ -3,6 +3,7 @@ import openai
 import logging
 import os
 import emoji
+from typing import Any
 from dotenv import load_dotenv
 from pathlib import Path
 from telegram import Bot,Update,InputMediaPhoto
