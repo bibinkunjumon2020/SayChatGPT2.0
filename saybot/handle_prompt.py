@@ -12,9 +12,11 @@ def choose_model(prompt): # method for chosing the Model as per user command
     func = config.current_model_function()
     if func is not None:
         response = func(prompt=prompt)
-        return response
+        return response         #it may return None if openai fails
     else:
         logging.error("Model does not exist")
+        return "No Model" #model not in the dictionary Dont return None 
+        
 
 def check_response_url(response):
     if validators.url(response):
@@ -24,7 +26,7 @@ def check_response_url(response):
 
 async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # handle the user promts
     prompt_permission = await check_prompt_balance(update=update) # Users daily limit checking(True or False )
-    
+   
     if prompt_permission:
         if update.message.text: #checking the input is text(emoji also a text)
             message_text = update.message.text
@@ -37,26 +39,28 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                     # ai_response = generate_image(message_text) # return is  never None
 
                     ai_response = choose_model(message_text)
-                    ai_response_image_check = check_response_url(ai_response)
-                    if ai_response_image_check:
-                        image_data = requests.get(ai_response).content
-                        await context.bot.send_photo(chat_id=update.message.chat_id,photo=image_data)
+                    if ai_response != "No Model": # check the function dictionary returned wrong
+                        ai_response_image_check = check_response_url(ai_response)
+                        if ai_response_image_check:
+                            image_data = requests.get(ai_response).content
+                            await context.bot.send_photo(chat_id=update.message.chat_id,photo=image_data)
+                        else:
+                            ## REDUCING PROMPT QUOTA Adding Usage statistics
+                            with sqlite3.connect(db_path) as connection:
+                                cursor = connection.cursor()
+                                cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
+                                data=cursor.fetchone()
+                                prompt_balance = data[2]
+                                prompt_quota = data[3]
+                                connection.commit()
+                            display_text = f"{ai_response}\n\n****Your Account****\n\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
+
+                            # logging.info(f"AI - {display_text}")
+                            await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
+
+                        await store_user_data(update=update)  # Store user data in MySQL
                     else:
-                        ## Adding Usage statistics
-                        with sqlite3.connect(db_path) as connection:
-                            cursor = connection.cursor()
-                            cursor.execute("SELECT * FROM usage_analysis WHERE id=?",(update.message.from_user.id,))
-                            data=cursor.fetchone()
-                            prompt_balance = data[2]
-                            prompt_quota = data[3]
-                            connection.commit()
-                        display_text = f"{ai_response}\n****Your Account****\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
-
-                        # logging.info(f"AI - {display_text}")
-                        await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
-
-                    await store_user_data(update=update)  # Store user data in MySQL
-                    
+                        await update.message.reply_text(reply_to_message_id=update.message.id,text="Please run a proper command before conversation !!!")
                 else:
                     logging.error(str(list_of_emojis))
                     await update.message.reply_text(reply_to_message_id=update.message.id,text="Only Text Input Permitted")

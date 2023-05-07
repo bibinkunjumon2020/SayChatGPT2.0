@@ -1,6 +1,6 @@
 
 from saybot import generate_chat,generate_response,generate_image
-
+from saybot.generate_from_document import generate_response_from_userdoc
 
 class ConfigClass:
     model_selection_command = "gpt-3.5-turbo"  # default model
@@ -8,6 +8,7 @@ class ConfigClass:
         'gpt-3.5-turbo':generate_chat,
         'text-davinci-003':generate_response,
         'dall.e2':generate_image,
+        'askyourbook':generate_response_from_userdoc,
         }
     def __init__(self):
         pass

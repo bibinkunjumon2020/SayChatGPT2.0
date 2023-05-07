@@ -1,4 +1,4 @@
-from saybot import Update,ContextTypes,logging,Bot,os,store_user_data,Any
+from saybot import Update,ContextTypes,logging,Bot,os,store_user_data,Any,file_upload
 from saybot.config import ConfigClass
 
 # Create an alias for the default context type hint
@@ -21,13 +21,17 @@ async def handle_start_command(update: Update, context: Context) -> None:
     await store_user_data(update=update) # storing user credentials in DB
  
  # Define function to handle the command processes
-async def handle_model_selection_command(update: Update, context:Context, model_command: Any) -> None:
+async def handle_model_selection_command(update, context, model_command: Any) -> None:
     bot, message, _ = get_message_data(update)
     ConfigClass.set_model_selection_command(model_command)  # set the new model selection command in the instance
     model_selection_command = ConfigClass.get_model_selection_command()
-    if model_command == "dall.e2":
+    if model_command == "uploadfile":
+        display_text = "Upload your file for asking questions\n"
+    elif model_command == "dall.e2":
         display_text = f"Model \"{model_command}\" of OpenAI used for IMAGE generation.\
             \nInput your 'prompt' for image generation.\n\nEx: drone carrying banana"
+    elif model_command == "askyourbook":
+        display_text = "Your Book is ready to answer you.Please ..! \nEx:summarise"
     else:
         display_text = f"Model \"{model_command}\" selected for further TEXT generation!\
             \nInput your 'prompt' for text response.\n\nEx: explain gravity"
@@ -48,3 +52,11 @@ async def handle_command_textdavinci003(update: Update, context: Context) -> Non
 # Define function to handle the /image command
 async def handle_command_image_dalle2(update: Update, context: Context) -> None:
     await handle_model_selection_command(update, context, "dall.e2") 
+
+# Define function to handle the /uploadfile command
+async def handle_command_upload_file(update: Update, context: Context) -> None:
+    await handle_model_selection_command(update, context, "uploadfile") 
+
+# Define function to handle the /askyourbook command
+async def handle_command_askyourbook(update: Update, context: Context) -> None:
+    await handle_model_selection_command(update, context, "askyourbook") 
