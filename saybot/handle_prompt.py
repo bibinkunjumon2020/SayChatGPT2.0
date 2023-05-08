@@ -3,15 +3,20 @@ from saybot import Update,ContextTypes,logging,generate_response,emoji,\
     generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os,validators,requests
 
 from saybot.config import ConfigClass
+from saybot.generate_from_document import generate_response_from_userdoc
+
 
 db_path = os.path.join(os.getcwd(),"database","user_data.db")
 
 
-def choose_model(prompt): # method for chosing the Model as per user command
+def choose_model(prompt,update:Update): # method for chosing the Model as per user command
     config = ConfigClass()
     func = config.current_model_function()
     if func is not None:
-        response = func(prompt=prompt)
+        if func == generate_response_from_userdoc:
+            response = func(prompt=prompt,update=update)
+        else:
+            response = func(prompt=prompt)
         return response         #it may return None if openai fails
     else:
         logging.error("Model does not exist")
@@ -38,7 +43,7 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                     # ai_response = generate_chat(message_text) # return is  never None
                     # ai_response = generate_image(message_text) # return is  never None
 
-                    ai_response = choose_model(message_text)
+                    ai_response = choose_model(message_text,update)
                     if ai_response != "No Model": # check the function dictionary returned wrong
                         ai_response_image_check = check_response_url(ai_response)
                         if ai_response_image_check:
@@ -56,7 +61,7 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                             display_text = f"{ai_response}\n\n****Your Account****\n\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
 
                             # logging.info(f"AI - {display_text}")
-                            await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text)
+                            await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text,parse_mode="Markdown") #parse mode MarkdownV2 gives error Can't parse entities:
 
                         await store_user_data(update=update)  # Store user data in MySQL
                     else:

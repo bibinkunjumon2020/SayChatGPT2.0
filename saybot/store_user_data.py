@@ -1,8 +1,5 @@
 
-from saybot import Update, logging, datetime, sqlite3, os, ContextTypes
-from saybot.config import ConfigClass
-from saybot.generate_from_document import construct_index
-import asyncio
+from saybot import Update, logging, datetime, sqlite3, os
 
 # create table if not exists
 db_directory = os.path.join(os.getcwd(), "database")
@@ -19,7 +16,7 @@ with sqlite3.connect(db_path) as connection:
              first_name TEXT, 
              last_name TEXT,
              location TEXT)'''
-    )
+                   )
 
     cursor.execute(   # This Store User Quota,Balance,Last access time Information
         '''CREATE TABLE IF NOT EXISTS usage_analysis 
@@ -30,15 +27,19 @@ with sqlite3.connect(db_path) as connection:
         '''
     )
 
-    # cursor.execute(  # DB for user individual book store
-    #     '''CREATE TABLE IF NOT EXISTS user_book_table
-    #         (id INTEGER PRIMARY KEY,
-    #         date_of_upload DATE,
-    #         book_name TEXT,
-    #         book_file BINARY
-    #         )
-    #         '''
-    # )
+    cursor.execute(  # DB for users file store
+        '''CREATE TABLE IF NOT EXISTS user_file_table
+            (
+            id INTEGER ,
+            date_of_upload DATE,
+            file_name TEXT,
+            file_id TEXT PRIMARY KEY,
+            target_index_dir TEXT,
+            file_title TEXT,
+            file_summary TEXT
+            )
+            '''
+    )
 
 
 async def store_user_data(update: Update):
@@ -110,70 +111,86 @@ async def store_prompt_quota(update: Update, **args):
         logging.info("DB connection is Closed:usage_analysis Table")
 
 
-async def file_upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logging.info("**** Inside File Upload ****")
-    model_selection_command = ConfigClass.get_model_selection_command() 
-    print("------------",model_selection_command) 
-    try:
-        if model_selection_command == "uploadfile": #/uploadfile command must be run before the file upload
-            user_uploaded_file = update.message.document
-            if user_uploaded_file.mime_type == "application/pdf":
-                file_id = user_uploaded_file.file_id  # this unique id can be used for reuse of file
-                file_name = user_uploaded_file.file_name
-                new_file = await context.bot.get_file(file_id=file_id) # it returns file
+async def insert_file_data_database(update:Update,index_folder_path,**kwargs):
 
-                source_dir = "source_dir"  # source of all files
-                if not os.path.exists(source_dir):
-                    os.makedirs(source_dir)
-                    
-                save_path = os.path.join(source_dir,file_name)
-                asyncio.ensure_future(new_file.download_to_drive(save_path))  # start coroutine background 
-                logging.info('PDF file saved successfully!')
-                await update.message.reply_text(reply_to_message_id=update.message.id,text="PDF file saved successfully!")
-                # context.job_queue.run_once(construct_index)
-                asyncio.create_task(construct_index())    # start coroutine background 
+    logging.info("inside insert_file_data_databse")
+    message = update.message
+    file = update.message.document
+    user_file_data = {
+        "id":message.from_user.id,
+        "date_of_upload":datetime.today() ,
+        "file_name" :file.file_name,
+        "file_id": file.file_id,
+        "target_index_dir":index_folder_path ,
+        "file_title": kwargs.get("file_title"),
+        "file_summary":kwargs.get("file_summary")
+    }
+
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT file_id FROM user_file_table WHERE file_id=?",(file.file_id,)
+            )
+            data = cursor.fetchone()
+            if data is None: # no file data in table
+                cursor.execute(
+                    "INSERT INTO user_file_table (id,date_of_upload,file_name,file_id,target_index_dir,file_title,file_summary) VALUES (:id,:date_of_upload,:file_name,:file_id,:target_index_dir,:file_title,:file_summary)",
+                    user_file_data
+                )
+                logging.info("New data added-user field table")
             else:
-                await update.message.reply_text(reply_to_message_id=update.message.id,text="'Please send a PDF file.'")
-
-        else:
-            await update.message.reply_text(reply_to_message_id=update.message.id,text="Only Text Input is allowed under this Command")
-
-    except Exception as e:
-        print(e)
-
-
-
-    # try:
+                cursor.execute("UPDATE user_file_table SET id=:id,date_of_upload=:date_of_upload,file_name=:file_name,file_id=:file_id,target_index_dir=:target_index_dir,file_title=:file_title,file_summary=:file_summary",user_file_data)
+                logging.info("data updated in user_file_table")
+            connection.commit()
+        except Exception as e:
+            logging.error(e)
     
-    #     book_name= update.message.document.file_name
-        
-    #     with open(book_name, "rb") as f:
-    #         while True:
-    #             chunk = f.read(1024)
-    #             if not chunk:
-    #                 break
-    #             # Do something with the chunk
 
+def retrieve_index_dir(user_id):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT target_index_dir,file_name FROM user_file_table WHERE id=?",(user_id,)
+            )
+            data = cursor.fetchone()
+            return data
+        except Exception as e:
+            logging.error(e)
 
-    # except Exception as e:
-    #     logging.error(e)
+def retrieve_index_dir_from_fileid(file_id):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT target_index_dir,file_name FROM user_file_table WHERE file_id=?",(file_id,)
+            )
+            data = cursor.fetchone()
+            return data
+        except Exception as e:
+            logging.error(e)
 
+def retrieve_user_file_table(userid):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT file_name,date_of_upload,file_title,file_summary,file_id FROM user_file_table WHERE id=?",(userid,)
+            )
+            data = cursor.fetchall()
+            return data
+        except Exception as e:
+            logging.error(e)
 
-
-    # book_field = {
-    #     "id": update.message.from_user.id,
-    #     "date_of_upload": datetime.today(),
-    #     "book_name": book_name,
-    #     "book_file" : update.message.document.file_contents,
-    # }
-
-    # with sqlite3.connect(db_path) as connection:
-    #     cursor = connection.cursor()
-    #     try:
-
-    #         cursor.execute(
-    #             "INSERT INTO user_book_table (id,date_of_upload,book_name,book_file) VALUES (:id,:date_of_upload,:book_name,:book_file)",
-    #             book_field
-    #         )
-    #     except Exception as e:
-    #         logging.error(e)
+def retrieve_chosen_file(file_id):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT file_name,date_of_upload,file_title,file_summary FROM user_file_table WHERE file_id=?",(file_id,)
+            )
+            data = cursor.fetchone()
+            return data
+        except Exception as e:
+            logging.error(e)
