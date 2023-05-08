@@ -3,6 +3,7 @@ from saybot import Update,ContextTypes,logging,generate_response,emoji,\
     generate_chat,generate_image,store_user_data,check_prompt_balance,sqlite3,os,validators,requests
 
 from saybot.config import ConfigClass
+from saybot.select_file_config import SelectFileClass
 from saybot.generate_from_document import generate_response_from_userdoc
 
 
@@ -14,7 +15,11 @@ def choose_model(prompt,update:Update): # method for chosing the Model as per us
     func = config.current_model_function()
     if func is not None:
         if func == generate_response_from_userdoc:
-            response = func(prompt=prompt,update=update)
+            check_file_select = SelectFileClass.get_select_file_id()
+            if check_file_select is None:
+                response = "Choose your File for Interaction"
+            else:
+                response = func(prompt=prompt,update=update)
         else:
             response = func(prompt=prompt)
         return response         #it may return None if openai fails
@@ -45,7 +50,7 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
 
                     ai_response = choose_model(message_text,update)
                     if ai_response != "No Model": # check the function dictionary returned wrong
-                        ai_response_image_check = check_response_url(ai_response)
+                        ai_response_image_check = check_response_url(ai_response)  #checking response is image or not
                         if ai_response_image_check:
                             image_data = requests.get(ai_response).content
                             await context.bot.send_photo(chat_id=update.message.chat_id,photo=image_data)
@@ -61,7 +66,7 @@ async def handle_message(update:Update, context:ContextTypes.DEFAULT_TYPE): # ha
                             display_text = f"{ai_response}\n\n****Your Account****\n\nPrompt Balance:{prompt_balance}\nDaily Quota:{prompt_quota}"
 
                             # logging.info(f"AI - {display_text}")
-                            await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text,parse_mode="Markdown") #parse mode MarkdownV2 gives error Can't parse entities:
+                            await update.message.reply_text(reply_to_message_id=update.message.id,text=display_text) #parse mode MarkdownV2 gives error Can't parse entities:
 
                         await store_user_data(update=update)  # Store user data in MySQL
                     else:

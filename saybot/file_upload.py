@@ -48,10 +48,11 @@ async def file_upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 index_task = asyncio.create_task(construct_index(source_dir= "source_dir",index_folder_path = index_folder_path))    # start coroutine background
                 await index_task  # wait for coroutine to complete
 
+                insert_db = asyncio.create_task(insert_file_data_database(update=update,index_folder_path=index_folder_path))
+                await insert_db # wait for coroutine to complete
                 file_title = generate_response_from_userdoc(prompt="generate one line title",update=update)
                 file_summary =generate_response_from_userdoc(prompt="generate short summary",update=update)
                 asyncio.create_task(insert_file_data_database(update=update,index_folder_path=index_folder_path,file_title=file_title,file_summary=file_summary))
-                # insert_file_data_database(update=update,index_folder_path=index_folder_path)
                 os.remove(source_file_path) # Removed the uploaded file after usage
             else:
                 await update.message.reply_text(reply_to_message_id=update.message.id, text="'Please send a PDF file.'")

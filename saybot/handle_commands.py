@@ -59,7 +59,7 @@ async def handle_model_selection_command(update: Update, context, model_command:
     bot, message, _ = get_message_data(update)
     ConfigClass.set_model_selection_command(model_command)  # set the new model selection command in the instance
     model_selection_command = ConfigClass.get_model_selection_command()
-    
+    check_select_file = SelectFileClass.get_select_file_id()
     display_texts = {
         "uploadfile": "Upload your File for asking questions\n",
         "selectfile": "Your Files:\n",
@@ -73,7 +73,13 @@ async def handle_model_selection_command(update: Update, context, model_command:
     
     if model_command == "selectfile":
         reply_markup = define_options_inline_keyboard(update.message.from_user.id)
+        if not reply_markup.inline_keyboard: #checking any is it empty / any files uploaded exist
+            display_text = "No Files..! Please Upload Files to proceed"
         await bot.send_message(chat_id=message.chat_id, text=display_text, reply_markup=reply_markup)
+    elif model_command == "askyourbook":
+        if check_select_file is None:
+            display_text = "You must select a file for interaction"
+        await bot.send_message(chat_id=message.chat_id, text=display_text)
     else:
         await bot.send_message(chat_id=message.chat_id, text=display_text)
     
