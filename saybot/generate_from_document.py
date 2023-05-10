@@ -6,31 +6,22 @@ from llama_index import SimpleDirectoryReader, LLMPredictor, PromptHelper, GPTVe
 # from saybot.config import ConfigClass
 from saybot.select_file_config import SelectFileClass
 # from langchain import OpenAI
-# import os
-# from dotenv import load_dotenv
-# from pathlib import Path
 
 from saybot import os,logging,Update,retrieve_index_dir,retrieve_index_dir_from_fileid
 # Set base directory and load environment variables
-
-# BASE_DIR = Path(__file__).resolve().parent.parent
-# dotenv_path = os.path.join(BASE_DIR, ".env")
-# load_dotenv(dotenv_path)
-
-openai_api_key = "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"
-
 
 def process_initializers():  # only initialize variables
     max_input_size = 4096
     num_outputs = 512
     max_chunk_overlap = 20
     chunk_size_limit = 600
-
+    logging.info("Inside process_initializers")    
+    openai_api_key = os.getenv("API_OPENAI")
     try:
         prompt_helper = PromptHelper(
             max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
 
-        llm_predictor = LLMPredictor(llm=ChatOpenAI(openai_api_key=openai_api_key,
+        llm_predictor = LLMPredictor(llm=ChatOpenAI(openai_api_key = openai_api_key,
                                                     temperature=0, model_name="gpt-3.5-turbo"))
         # llm_predictor = LLMPredictor(llm=OpenAI(openai_api_key=openai_api_key,temperature=0, model_name="text-davinci-003"))
 
@@ -42,7 +33,7 @@ def process_initializers():  # only initialize variables
 
 # Convert uploaded file into index and store in target
 async def construct_index(source_dir,index_folder_path) -> None :
-    print("inside construct_index")
+    logging.info("inside construct_index")
     try:
         service_context = process_initializers() # calling method
         documents = SimpleDirectoryReader(source_dir).load_data()

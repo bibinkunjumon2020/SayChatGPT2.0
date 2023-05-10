@@ -100,7 +100,7 @@ async def store_prompt_quota(update: Update, **args):
                                prompt_data)
                 logging.info("User Prompt Data inserted into database")
             else:
-                cursor.execute("UPDATE usage_analysis SET id=:id,last_accessed_time=:time,prompt_balance=:prompt_balance,prompt_quota=:prompt_quota WHERE id=:id",
+                cursor.execute("UPDATE usage_analysis SET last_accessed_time=:time,prompt_balance=:prompt_balance,prompt_quota=:prompt_quota WHERE id=:id",
                                prompt_data
                                )
                 logging.info("User Prompt Data  updated in database")
@@ -116,6 +116,9 @@ async def insert_file_data_database(update:Update,index_folder_path,**kwargs):
     logging.info("inside insert_file_data_databse")
     message = update.message
     file = update.message.document
+    # logging.info("******data*******")
+    # logging.info(kwargs.get("file_title"))
+    # logging.info(kwargs.get("file_summary"))
     user_file_data = {
         "id":message.from_user.id,
         "date_of_upload":datetime.today() ,
@@ -140,8 +143,8 @@ async def insert_file_data_database(update:Update,index_folder_path,**kwargs):
                 )
                 logging.info("New data added-user field table")
             else:
-                cursor.execute("UPDATE user_file_table SET id=:id,date_of_upload=:date_of_upload,file_name=:file_name,file_id=:file_id,target_index_dir=:target_index_dir,file_title=:file_title,file_summary=:file_summary",user_file_data)
-                logging.info("data updated in user_file_table")
+                cursor.execute("UPDATE user_file_table SET file_title=:file_title,file_summary=:file_summary WHERE file_id=:file_id",user_file_data)
+                logging.info("data updated in user_file_table") #while update dont give prime key
             connection.commit()
         except Exception as e:
             logging.error(e)

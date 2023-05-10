@@ -1,13 +1,14 @@
 from saybot import Update,ContextTypes,logging,Bot,os,store_user_data,Any,\
-            retrieve_user_file_table,CallbackContext,retrieve_chosen_file
+            retrieve_user_file_table,CallbackContext,retrieve_chosen_file,ChatAction,InlineKeyboardButton,\
+            InlineKeyboardMarkup
 from saybot.config import ConfigClass
 from saybot.select_file_config import SelectFileClass
-from telegram import InlineKeyboardButton,InlineKeyboardMarkup
+# from telegram import InlineKeyboardButton,InlineKeyboardMarkup
 # Create an alias for the default context type hint
 Context = ContextTypes.DEFAULT_TYPE
 file_id_list ={} # dictionary storing key-file name value-file_id
-import json
 async def inline_button_click_handler(update:Update,context:CallbackContext):
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
     query = update.callback_query
     await query.answer(text="File Selected..!")
     selected_file_id = file_id_list[query.data]
@@ -48,6 +49,7 @@ def get_message_data(update: Update) -> tuple:
 
 # Define function to handle the /start command   <-- START COMMAND-->
 async def handle_start_command(update: Update, context: Context) -> None:
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
     bot, message, user_full_name = get_message_data(update)
     logging.info(f"/start command pressed by {user_full_name}")
     welcome_text = f"Hello {user_full_name}\nI'm \"SayChatGPT\" \nYour AI-powered chatbot \nI'm here to assist you. \nAsk your question.!\n"
@@ -61,11 +63,14 @@ async def handle_model_selection_command(update: Update, context, model_command:
     model_selection_command = ConfigClass.get_model_selection_command()
     check_select_file = SelectFileClass.get_select_file_id()
     display_texts = {
-        "uploadfile": "Upload your File for asking questions\n",
-        "selectfile": "Your Files:\n",
-        "dall.e2": f"Model \"{model_command}\" of OpenAI used for IMAGE generation.\
-                      \nInput your 'prompt' for image generation.\n\nEx: drone carrying banana",
-        "askyourbook": "Your File is ready to answer.Start chat.. \nEx:summarise/give a title"
+        "uploadfile": "Upload your File for Chat.Only one PDF document at a time.(Max size = 10 MB) \n",
+        "selectfile": "Your Files:📁\n",
+        "dall.e2": f"👍 DALL·E 2 of OpenAI can create realistic images and art from a description.Input 'prompt'\
+                    \n\nEx: walking banana",
+        "askyourbook": "Your File is ready to answer.Start chat.. \nEx: summarise / give a title",
+        "chatgpt":"👍 ChatGPT of OpenAI selected for your 💬 Input 'prompt'\n\nEx: explain gravity",
+        "davincigpt":"👍 Davinci:GPT-3 of OpenAI selected for your 💬 Input 'prompt'\n\nEx: explain gravity",
+        "selectcommand":"Choose a proper command",
     }
     
     display_text = display_texts.get(model_command, f"Model \"{model_command}\" selected for further TEXT generation!\
@@ -85,28 +90,57 @@ async def handle_model_selection_command(update: Update, context, model_command:
     
     logging.info(f"***Inside handle_command_{model_command} ***{model_selection_command}")
 
-# Define function to handle the /gpt35turbo command
-async def handle_command_gpt35turbo(update: Update, context: Context) -> None:
-    await handle_model_selection_command(update, context, "gpt-3.5-turbo")
+# Define function to handle the /chatgpt command
+async def handle_command_chatgpt(update: Update, context: Context) -> None:
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    await handle_model_selection_command(update, context, "chatgpt")
 
-# Define function to handle the /textdavinci003 command
-async def handle_command_textdavinci003(update: Update, context: Context) -> None:
-    await handle_model_selection_command(update, context, "text-davinci-003") 
+# Define function to handle the /davincigpt command
+async def handle_command_davincigpt(update: Update, context: Context) -> None:
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    await handle_model_selection_command(update, context, "davincigpt") 
 
 # Define function to handle the /image command
 async def handle_command_image_dalle2(update: Update, context: Context) -> None:
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
     await handle_model_selection_command(update, context, "dall.e2") 
 
 # Define function to handle the /uploadfile command
 async def handle_command_upload_file(update: Update, context: Context) -> None:
-    await handle_model_selection_command(update, context, "uploadfile") 
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    if update.message.chat.type == 'private': #checking the message came from private chat with the bot
+        await handle_model_selection_command(update, context, "uploadfile") 
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id,text="This Feature is only for Individual use.")
 
 # Define function to handle the /askyourbook command
 async def handle_command_askyourbook(update: Update, context: Context) -> None:
-    await handle_model_selection_command(update, context, "askyourbook") 
+    # await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    # await handle_model_selection_command(update, context, "askyourbook") 
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    if update.message.chat.type == 'private': #checking the message came from private chat with the bot
+        await handle_model_selection_command(update, context, "askyourbook") 
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id,text="This Feature is only for Individual use.")
+
 
 # Define function to handle the /askyourbook command
 async def handle_command_select_file(update: Update, context: Context) -> None:
-    await handle_model_selection_command(update, context, "selectfile") 
+    # await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    # await handle_model_selection_command(update, context, "selectfile") 
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    if update.message.chat.type == 'private': #checking the message came from private chat with the bot
+        await handle_model_selection_command(update, context, "selectfile") 
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id,text="This Feature is only for Individual use.")
+
+
+# Define function to handle the /selectcommand command
+async def handle_command_select_command(update: Update, context: Context) -> None:
+    # await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    # await handle_model_selection_command(update, context, "selectfile") 
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id,action=ChatAction.TYPING) #setting typing status
+    await handle_model_selection_command(update, context, "selectcommand") 
+
 
     

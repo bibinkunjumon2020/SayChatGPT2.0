@@ -1,6 +1,6 @@
 from saybot import openai,os,logging
 
-def generate_image(prompt):
+async def generate_image(prompt):
     logging.info("Using DALL.E 2")
     openai.api_key = os.getenv("API_OPENAI")
     try:
@@ -20,6 +20,8 @@ def generate_image(prompt):
     except Exception as e:
         logging.error("error occurred while generating the response"+e)
         message_response = "Sorry, an error occurred while generating the response.\n"+ e
+    except TimeoutError:
+        logging.error("DALL.E Timeout")
     finally:
         return message_response
     

@@ -1,6 +1,6 @@
 from saybot import openai,os,logging
 
-def generate_response(prompt):
+async def generate_response(prompt):
     # Set up OpenAI API key
     logging.info("Using text-davinci-003")
     openai.api_key = os.getenv("API_OPENAI")

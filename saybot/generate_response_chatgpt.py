@@ -1,6 +1,6 @@
 from saybot import openai,os,logging
 
-def generate_chat(prompt):
+async def generate_chat(prompt):
     logging.info("Using ChatGPT 3.5 Turbo")
     openai.api_key = os.getenv("API_OPENAI")
     try:
