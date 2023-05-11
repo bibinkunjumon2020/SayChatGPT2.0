@@ -27,7 +27,8 @@ from saybot.handler_prompt_quota import check_prompt_balance
 from saybot.handle_prompt import handle_message
 from saybot.handle_commands import handle_start_command,handle_command_chatgpt,handle_command_davincigpt,\
                                     handle_command_image_dalle2,handle_command_upload_file,handle_command_askyourbook,\
-                                    handle_command_select_file,inline_button_click_handler,handle_command_select_command
+                                    handle_command_select_file,inline_button_click_handler,handle_command_select_command,\
+                                    handle_info_command,handle_elite_command
 
 
 # Set base directory and load environment variables
