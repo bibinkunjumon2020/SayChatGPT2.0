@@ -38,9 +38,13 @@ Bot :
 ## Working Screenshots
 
 <img width="579" alt="image" src="https://github.com/bibinkunjumon2020/SayChatGPT2.0/assets/104210649/548f3cd1-c9d6-4764-a009-825a68730c09">
+
 <img width="548" alt="image" src="https://github.com/bibinkunjumon2020/SayChatGPT2.0/assets/104210649/7030f91f-a000-45d8-8148-ab1cf5c8927e">
+
 <img width="564" alt="image" src="https://github.com/bibinkunjumon2020/SayChatGPT2.0/assets/104210649/b51166a7-0210-4a74-8fd8-b66fcd98a7fd">
+
 <img width="728" alt="image" src="https://github.com/bibinkunjumon2020/SayChatGPT2.0/assets/104210649/ab18b8db-b92c-427f-9a17-22c5122fe05c">
+
 <img width="1138" alt="image" src="https://github.com/bibinkunjumon2020/SayChatGPT2.0/assets/104210649/f7469b73-8797-46d9-9819-a343a82ab411">
 
 
